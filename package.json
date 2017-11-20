@@ -1,0 +1,18 @@
+{
+  "name": "uniCalSync",
+  "version": "0.0.1",
+  "description": "Node script to import the lecture calendar form LM-Informatica UniBo into nextCloud",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jSparber",
+  "license": "AGPL-3.0+",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "moment": "^2.19.2",
+    "node-caldav-mod": "git+https://github.com/jsparber/node-caldav-mod.git",
+    "request": "^2.83.0",
+    "sha1": "^1.1.1"
+  }
+}
