@@ -21,9 +21,8 @@ function sync () {
     for (var key in appointments) {
       if (appointments.hasOwnProperty(key)) {
         var element = appointments[key];
-        if (element.attributes.CodiceAttivita == "81667" ||
-          element.attributes.CodiceAttivita == "28796" ||
-          element.attributes.CodiceAttivita == "81670") {
+        if (config.classes == "" ||
+          config.classes.indexOf(element.attributes.CodiceAttivita) !== -1) {
           var label = "<strong>Aula</strong><br>";
           var location = $("#" + element["domElements"][0])
             .find("strong:contains('Aula')")
