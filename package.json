@@ -1,5 +1,5 @@
 {
-  "name": "uniCalSync",
+  "name": "UniBoCalSync",
   "version": "0.0.1",
   "description": "Node script to import the lecture calendar form LM-Informatica UniBo into nextCloud",
   "main": "index.js",
