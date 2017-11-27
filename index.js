@@ -7,8 +7,22 @@ const config = require('./config');
 
 const base_url = "http://corsi.unibo.it/informatica-magistrale/Pagine/orario-lezioni.aspx?Indirizzo=992";
 
-sync();
-
+removeOldEvents(sync);
+function removeOldEvents (cb) {
+  caldav.getEvents(config.server, config.username, config.password, "20170101T120000", "", function (error, data) {
+    if (!error) {
+      data.forEach ((element, index) => {
+        console.log("Remove Event: " + element.uid);
+        caldav.removeEvent (element, config.server, config.username, config.password, () => {});
+        if (index > data.length - 2) {
+          cb()
+        }
+      });
+    }
+    else
+      console.log(error);
+  });
+}
 function sync () {
   request(base_url, function (error, response, body) {
     var $ = cheerio.load(body);
