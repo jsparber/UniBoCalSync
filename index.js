@@ -13,7 +13,8 @@ function removeOldEvents (cb) {
     if (!error) {
       data.forEach ((element, index) => {
         console.log("Remove Event: " + element.uid);
-        caldav.removeEvent (element, config.server, config.username, config.password, () => {});
+        element.key = element.uid;
+        caldav.removeEvent (element, config.server, config.username, config.password, (error) => {if (error) console.log(error)});
         if (index > data.length - 2) {
           cb()
         }
