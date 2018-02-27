@@ -7,16 +7,17 @@ const config = require('./config');
 
 const base_url = "http://corsi.unibo.it/informatica-magistrale/Pagine/orario-lezioni.aspx?Indirizzo=992";
 
-removeOldEvents(sync);
-function removeOldEvents (cb) {
-  caldav.getEvents(config.server, config.username, config.password, "20170101T120000", "", function (error, data) {
+//removeOldEvents(sync);
+
+getLectures(updateLectures);
+function removeOldLectures (lectures) {
+  caldav.getEvents(config.server, config.username, config.password, moment().format('YYYYMMDDThhmmss'), "", function (error, data) {
     if (!error) {
       data.forEach ((element, index) => {
-        console.log("Remove Event: " + element.uid);
-        element.key = element.uid;
-        caldav.removeEvent (element, config.server, config.username, config.password, (error) => {if (error) console.log(error)});
-        if (index > data.length - 2) {
-          cb()
+        if (lectures[element.uid] == undefined) {
+          console.log("Remove Event: " + element.uid);
+          element.key = element.uid;
+          caldav.removeEvent (element, config.server, config.username, config.password, (error) => {if (error) console.log(error)});
         }
       });
     }
@@ -24,7 +25,22 @@ function removeOldEvents (cb) {
       console.log(error);
   });
 }
-function sync () {
+
+function updateLectures(lectures) {
+  for(var element in lectures) {
+  caldav.addEvent(lectures[element], config.server, config.username, config.password,
+    function (error) {
+      if (error)
+        console.log(error);
+      else
+        console.log("Imported!");
+    });
+  }
+  removeOldLectures (lectures);
+}
+
+function getLectures (finished) {
+  var lectures = {};
   request(base_url, function (error, response, body) {
     var $ = cheerio.load(body);
     var searchString = "$create(Telerik.Web.UI.RadScheduler, "
@@ -62,6 +78,7 @@ function sync () {
             "http://www.scienze.unibo.it/it/corsi/insegnamenti?codiceScuola=843899&codiceMateria=" +
             element.attributes.CodiceAttivita +
             "&annoAccademico=2017&codiceCorso=8028&single=True&search=True"
+
           const event = {
             key: hash(element.internalID),
             summary: element.toolTip,
@@ -70,15 +87,10 @@ function sync () {
             endDate: moment(element.end, "YYYY/MM/DD HH:mm"),
             location: location
           }
-          caldav.addEvent(event, config.server, config.username, config.password,
-            function (error) {
-              if (error)
-                console.log(error);
-              else
-                console.log("Imported");
-            });
+          lectures[event.key] = event;
         }
       }
     }
+    finished (lectures);
   });
 }

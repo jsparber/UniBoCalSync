@@ -4,6 +4,7 @@
   "description": "Node script to import the lecture calendar form LM-Informatica UniBo into nextCloud",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "jSparber",
