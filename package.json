@@ -11,7 +11,7 @@
   "license": "AGPL-3.0+",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "moment": "^2.19.2",
+    "moment": "^2.21.0",
     "node-caldav-mod": "git+https://github.com/jsparber/node-caldav-mod.git",
     "request": "^2.83.0",
     "sha1": "^1.1.1"
