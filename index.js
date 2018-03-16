@@ -14,7 +14,7 @@ function removeOldLectures (lectures) {
   caldav.getEvents(config.server, config.username, config.password, moment().format('YYYYMMDDThhmmss'), "", function (error, data) {
     if (!error) {
       data.forEach ((element, index) => {
-        if (lectures[element.uid] == undefined) {
+        if (moment().diff(element.startDate) > 0 && lectures[element.uid] == undefined) {
           console.log("Remove Event: " + element.uid);
           element.key = element.uid;
           caldav.removeEvent (element, config.server, config.username, config.password, (error) => {if (error) console.log(error)});
