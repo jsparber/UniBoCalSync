@@ -10,10 +10,13 @@
   "author": "jSparber",
   "license": "AGPL-3.0+",
   "dependencies": {
+    "@datafire/caldav": "^2.0.2",
     "cheerio": "^1.0.0-rc.2",
-    "moment": "^2.21.0",
+    "moment": "^2.24.0",
     "node-caldav-mod": "git+https://github.com/jsparber/node-caldav-mod.git",
-    "request": "^2.83.0",
+    "nominatim-client": "^1.0.1",
+    "nominatim-js": "^1.0.0",
+    "request": "^2.88.0",
     "sha1": "^1.1.1"
   }
 }
