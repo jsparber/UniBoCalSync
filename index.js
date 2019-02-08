@@ -1,96 +1,59 @@
 const request = require('request');
-const moment = require('moment');
-const caldav = require("node-caldav-mod");
-const cheerio = require('cheerio');
 const hash = require('sha1');
 const config = require('./config');
 
-const base_url = "http://corsi.unibo.it/informatica-magistrale/Pagine/orario-lezioni.aspx?Indirizzo=992";
-
-//removeOldEvents(sync);
-
-getLectures(updateLectures);
-function removeOldLectures (lectures) {
-  caldav.getEvents(config.server, config.username, config.password, moment().format('YYYYMMDDThhmmss'), "", function (error, data) {
-    if (!error) {
-      data.forEach ((element, index) => {
-        if (moment().diff(element.startDate) > 0 && lectures[element.uid] == undefined) {
-          console.log("Remove Event: " + element.uid);
-          element.key = element.uid;
-          caldav.removeEvent (element, config.server, config.username, config.password, (error) => {if (error) console.log(error)});
-        }
-      });
-    }
-    else
-      console.log(error);
-  });
+function genCourseUrl(code) {
+  let url = "http://www.scienze.unibo.it//it/corsi/insegnamenti?codiceScuola=843899&codiceMateria=" +
+    code +
+    "&annoAccademico=2018&codiceCorso=8028&single=True&search=True";
+  return url;
 }
 
-function updateLectures(lectures) {
-  for(var element in lectures) {
-  caldav.addEvent(lectures[element], config.server, config.username, config.password,
-    function (error) {
-      if (error)
-        console.log(error);
-      else
-        console.log("Imported!");
-    });
-  }
-  removeOldLectures (lectures);
+let cal = require('@datafire/caldav').create({
+  username: config.username,
+  password: config.password,
+  server: config.server,
+  basePath: "/remote.php/dav",
+  principalPath: "/principals"
+});
+
+getLectures(updateLectures, 2);
+function updateLectures(lectures, index) {
+	let element = lectures[index];
+	if (element != undefined) {
+		var id = hash(element.summary + element.start + element.end);
+    element.id = id;
+		element.filename = config.path + id + ".ics";
+		console.log(element);
+		cal.createEvent(element).then( _ => {
+			console.log(index);
+			updateLectures(lectures, ++index);
+		});
+	}
 }
 
-function getLectures (finished) {
-  var lectures = {};
-  request(base_url, function (error, response, body) {
-    var $ = cheerio.load(body);
-    var searchString = "$create(Telerik.Web.UI.RadScheduler, "
-    var start = body.indexOf(searchString) + searchString.length;
-    var end = body.indexOf("}, {", start) + 1;
-    body = JSON.parse(body.substring(start, end));
-    appointments = JSON.parse(body.appointments);
+function getLectures (finished, index) {
+	var lectures = [];
+  const base_url = "https://corsi.unibo.it/magistrale/informatica/orario-lezioni/@@orario_reale_json?anno=" + index + "&curricula=A58-000";
+	request(base_url, function (error, response, body) {
+		let json = JSON.parse(body);
+		let events = json.events;
 
-    for (var key in appointments) {
-      if (appointments.hasOwnProperty(key)) {
-        var element = appointments[key];
-        if (config.classes == "" ||
-          config.classes.indexOf(element.attributes.CodiceAttivita) !== -1) {
-          var label = "<strong>Aula</strong><br>";
-          var location = $("#" + element["domElements"][0])
-            .find("strong:contains('Aula')")
-            .parent()
-            .html()
-            .replace(/(\r\n|\n|\r|  )/gm,"");
-          location = location.substr(location.indexOf(label) + label.length)
-            .replace(/<br>/g," - ");
+		for (let key of events) {
+			var id = key.title + key.start + key.end;
+			var description = "Docente: " + key.docente + " | " + genCourseUrl(key.cod_modulo);
+      var building = key.aule[0];
+      var location = building.des_risorsa + " | " + building.des_piano + " | " + building.des_ubicazione;
 
-          label = "<strong>Docente</strong><br>";
-          var prof = $("#" + element["domElements"][0])
-            .find("strong:contains('Docente')")
-            .parent()
-            .html()
-            .replace(/(\r\n|\n|\r|  )/gm,"");
-          prof = prof.substr(prof.indexOf(label) + label.length)
-            .replace(/<br>/g," - ");
-
-          var description = "Prof.:\\n" +
-            prof + "\\n"+
-            "URL:\\n" +
-            "http://www.scienze.unibo.it/it/corsi/insegnamenti?codiceScuola=843899&codiceMateria=" +
-            element.attributes.CodiceAttivita +
-            "&annoAccademico=2017&codiceCorso=8028&single=True&search=True"
-
-          const event = {
-            key: hash(element.internalID),
-            summary: element.toolTip,
-            description: description,
-            startDate: moment(element.start, "YYYY/MM/DD HH:mm"),
-            endDate: moment(element.end, "YYYY/MM/DD HH:mm"),
-            location: location
-          }
-          lectures[event.key] = event;
-        }
+			const event = {
+        summary: key.title,
+        description: description,
+        start: key.start,
+        end: key.end,
+        location: location
       }
+      lectures.push(event);
     }
-    finished (lectures);
+    finished (lectures, 0);
   });
 }
