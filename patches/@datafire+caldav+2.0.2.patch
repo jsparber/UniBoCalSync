@@ -1,0 +1,36 @@
+diff --git a/node_modules/@datafire/caldav/index.js b/node_modules/@datafire/caldav/index.js
+index 9074dfe..7d1a89d 100644
+--- a/node_modules/@datafire/caldav/index.js
++++ b/node_modules/@datafire/caldav/index.js
+@@ -102,6 +102,7 @@ caldav.addAction('listEvents', {
+         calendarData: {type: 'string'},
+         start: {type: 'string', format: 'date-time'},
+         end: {type: 'string', format: 'date-time'},
++        location: {type: 'string'},
+         summary: {type: 'string'},
+       }
+     }
+@@ -127,6 +128,7 @@ caldav.addAction('listEvents', {
+             evt.start = parsed.DTSTART;
+             evt.end = parsed.DTEND;
+             evt.summary = parsed.SUMMARY;
++            evt.location = parsed.LOCATION;
+             resolve();
+           })
+         })
+@@ -269,6 +271,7 @@ caldav.addAction('createEvent', {
+     {title: 'start', type: 'string', format: 'date-time'},
+     {title: 'end', type: 'string', format: 'date-time'},
+     {title: 'summary', type: 'string'},
++    {title: 'location', type: 'string'},
+     {title: 'organizer', type: 'string', default: ''},
+     {title: 'filename', type: 'string'},
+   ],
+@@ -281,6 +284,7 @@ caldav.addAction('createEvent', {
+           start: new Date(input.start),
+           end: new Date(input.end),
+           summary: input.summary,
++          location: input.location,
+           organizer: input.organizer,
+         }]
+       });
